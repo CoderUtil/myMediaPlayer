@@ -1,0 +1,58 @@
+﻿<Page
+    x:Class="myMediaPlayer.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:myMediaPlayer"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:c="using:myMediaPlayer.Converter"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <!-- 声明转换器 -->
+        <ResourceDictionary>
+            <c:timeLineConverter x:Key="timeLineConverter"/>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid x:Name="myGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+
+        <Ellipse Width="450" Height="450" Margin="75,45,75,45" 
+                 Grid.Row="0" x:Name="myMusicPlayer" Visibility="Collapsed"
+                 VerticalAlignment="Center" HorizontalAlignment="Center"
+                 RenderTransformOrigin="0.5, 0.5">
+            <Ellipse.RenderTransform>
+                <CompositeTransform />
+            </Ellipse.RenderTransform>
+            <Ellipse.Fill>
+                <ImageBrush ImageSource="Assets/background.jpg"/>
+            </Ellipse.Fill>
+        </Ellipse>
+
+        <MediaPlayerElement x:Name="myMediaPlayer" AreTransportControlsEnabled="False" HorizontalAlignment="Stretch"  Grid.Row="0"/>
+
+        <StackPanel Grid.Row="1">
+            <Slider Padding="50,0,50,0" x:Name="timeLine" Value="{x:Bind mediaTimelineController.Position, Converter={StaticResource timeLineConverter},Mode=TwoWay}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+            <AppBarButton Icon="Play" FontSize="20" Click="start_Click" Label="播放"/>
+            <AppBarButton Icon="Pause" FontSize="20" Click="pause_Click" Label="暂停"/>
+            <AppBarButton Icon="Stop" FontSize="20" Click="stop_Click" Label="停止"/>
+            <AppBarButton Icon="OpenFile" FontSize="20" Click="add_Click" Label="选择文件"/>
+            <AppBarButton Icon="Volume" FontSize="20" Label="音量">
+                <AppBarButton.Flyout>
+                    <Flyout>
+                        <Slider x:Name="volumeSlider" ValueChanged="ChangeMediaVolume" Value="1"/>
+                    </Flyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+            <AppBarButton Icon="FullScreen" FontSize="20" Click="display_Click" Label="全屏"/>
+        </StackPanel>
+    </Grid>
+</Page>
