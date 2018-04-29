@@ -31,6 +31,7 @@ namespace myMediaPlayer
         private MediaPlayer mediaPlayer = new MediaPlayer();                                                //  用于设置媒体播放器
         private MediaTimelineController mediaTimelineController = new MediaTimelineController();            //  用于控制进度
         private TimeSpan duration;                                                                          //  用于获取媒体项的总秒数
+        private DispatcherTimer timer;
 
         public MainPage()
         {
@@ -55,29 +56,48 @@ namespace myMediaPlayer
             {
                 timeLine.Minimum = 0;                           //  设置最小长度
                 timeLine.Maximum = duration.TotalSeconds;       //  设置最大长度
-                timeLine.StepFrequency = 1;                     //  设置更新频率
+                timeLine.StepFrequency = 0.5;                   //  设置更新频率
             });
         }
 
-        private void start_Click(object sender, RoutedEventArgs e)
+        private void startOrPause(object sender, RoutedEventArgs e)
         {
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(1);
-            timer.Tick += timer_Tick;
-            timer.Start();
-            mediaTimelineController.Start();
-        }
-
-        private void pause_Click(object sender, RoutedEventArgs e)
-        {
-            if (mediaTimelineController.State == MediaTimelineControllerState.Running)
+            if (timer == null)
             {
-                mediaTimelineController.Pause();
+                timer = new DispatcherTimer();
+                timer.Interval = TimeSpan.FromSeconds(1);
+                timer.Tick += timer_Tick;
+                timer.Start();
+
+                EllStoryboard.Begin();              //  图片开始旋转
+                mediaTimelineController.Start();
+
+                var pauseIcon = new SymbolIcon(Symbol.Pause);
+                startAndPauseButton.Icon = pauseIcon;
+                startAndPauseButton.Label = "暂停";
             }
             else
             {
-                mediaTimelineController.Resume();
+                if (mediaTimelineController.State == MediaTimelineControllerState.Running)
+                {
+                    EllStoryboard.Pause();          //  图片暂停旋转
+                    mediaTimelineController.Pause();
+
+                    var playIcon = new SymbolIcon(Symbol.Play);
+                    startAndPauseButton.Icon = playIcon;
+                    startAndPauseButton.Label = "播放";
+                }
+                else
+                {
+                    EllStoryboard.Begin();
+                    mediaTimelineController.Resume();
+
+                    var pauseIcon = new SymbolIcon(Symbol.Pause);
+                    startAndPauseButton.Icon = pauseIcon;
+                    startAndPauseButton.Label = "暂停";
+                }
             }
+
         }
 
         void timer_Tick(object sender, object e)
@@ -92,8 +112,18 @@ namespace myMediaPlayer
 
         private void stop_Click(object sender, RoutedEventArgs e)
         {
+            stopMediaPlayer();
+        }
+
+        private void stopMediaPlayer()
+        {
+            EllStoryboard.Stop();                       //  图片终止旋转
             mediaTimelineController.Position = TimeSpan.FromSeconds(0);
             mediaTimelineController.Pause();
+
+            var playIcon = new SymbolIcon(Symbol.Play);
+            startAndPauseButton.Icon = playIcon;
+            startAndPauseButton.Label = "播放";
         }
 
         private async void add_Click(object sender, RoutedEventArgs e)
@@ -120,6 +150,7 @@ namespace myMediaPlayer
                     myMusicPlayer.Visibility = Visibility.Collapsed;
                 }
 
+                stopMediaPlayer();      //  选取了新的视频后, 终止之前的视频
             }
         }
 
@@ -141,6 +172,5 @@ namespace myMediaPlayer
                 view.TryEnterFullScreenMode();
             }
         }
-       
     }
 }
